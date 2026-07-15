@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Voice Assistant — Customer Support</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  SIDEBAR                                   -->
+<!-- ══════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <i class="fa-solid fa-robot brand-icon"></i>
+    <span>VoiceAI<br><small>Customer Support</small></span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" onclick="showSection('dashboard')">
+      <i class="fa-solid fa-gauge-high"></i> Dashboard
+    </button>
+    <button class="nav-btn" onclick="showSection('assistant')">
+      <i class="fa-solid fa-microphone"></i> Voice Assistant
+    </button>
+    <button class="nav-btn" onclick="showSection('history')">
+      <i class="fa-solid fa-clock-rotate-left"></i> History
+    </button>
+    <button class="nav-btn" onclick="showSection('faq')">
+      <i class="fa-solid fa-circle-question"></i> FAQ / KB
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="btn-danger-sm" onclick="resetAll()">
+      <i class="fa-solid fa-trash"></i> Reset Demo
+    </button>
+    <a class="btn-export" href="/export">
+      <i class="fa-solid fa-file-csv"></i> Export CSV
+    </a>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  MAIN CONTENT                              -->
+<!-- ══════════════════════════════════════════ -->
+<main class="main-content">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <h1 class="topbar-title">AI Customer Support Assistant</h1>
+    <div class="topbar-right">
+      <span class="badge-live"><i class="fa-solid fa-circle"></i> LIVE</span>
+      <span id="clock" class="topbar-clock"></span>
+    </div>
+  </header>
+
+  <!-- ── DASHBOARD ─────────────────────────── -->
+  <section id="section-dashboard" class="section active">
+    <h2 class="section-title"><i class="fa-solid fa-gauge-high"></i> Dashboard</h2>
+
+    <!-- Metric cards -->
+    <div class="cards-grid">
+      <div class="card card-blue">
+        <div class="card-icon"><i class="fa-solid fa-comments"></i></div>
+        <div class="card-info">
+          <p class="card-label">Total Conversations</p>
+          <p class="card-value" id="m-total">0</p>
+        </div>
+      </div>
+      <div class="card card-green">
+        <div class="card-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="card-info">
+          <p class="card-label">Resolved Requests</p>
+          <p class="card-value" id="m-resolved">0</p>
+        </div>
+      </div>
+      <div class="card card-orange">
+        <div class="card-icon"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
+        <div class="card-info">
+          <p class="card-label">Escalated Requests</p>
+          <p class="card-value" id="m-escalated">0</p>
+        </div>
+      </div>
+      <div class="card card-purple">
+        <div class="card-icon"><i class="fa-solid fa-percent"></i></div>
+        <div class="card-info">
+          <p class="card-label">Resolution Rate</p>
+          <p class="card-value" id="m-rate">0%</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick demo queries -->
+    <div class="demo-panel">
+      <h3><i class="fa-solid fa-flask"></i> Quick Demo Queries</h3>
+      <div class="demo-buttons">
+        <button class="demo-btn" onclick="loadDemo('I want to check my account balance')">
+          <i class="fa-solid fa-wallet"></i> Balance
+        </button>
+        <button class="demo-btn" onclick="loadDemo('My internet is not working')">
+          <i class="fa-solid fa-wifi"></i> Internet Issue
+        </button>
+        <button class="demo-btn" onclick="loadDemo('I want to cancel my subscription')">
+          <i class="fa-solid fa-ban"></i> Cancel
+        </button>
+        <button class="demo-btn" onclick="loadDemo('I have a billing issue with extra charges')">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Billing
+        </button>
+        <button class="demo-btn" onclick="loadDemo('I want to speak to a human agent')">
+          <i class="fa-solid fa-headset"></i> Human Agent
+        </button>
+        <button class="demo-btn" onclick="loadDemo('مجھے اپنا بیلنس چیک کرنا ہے')">
+          <i class="fa-solid fa-language"></i> Urdu Query
+        </button>
+      </div>
+    </div>
+
+    <!-- Recent history on dashboard -->
+    <div class="recent-panel">
+      <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Interactions</h3>
+      <div id="recent-list" class="recent-list">
+        <p class="placeholder">No conversations yet. Start by sending a query.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── VOICE ASSISTANT ───────────────────── -->
+  <section id="section-assistant" class="section">
+    <h2 class="section-title"><i class="fa-solid fa-microphone"></i> Voice Assistant</h2>
+
+    <div class="assistant-layout">
+
+      <!-- Mic panel -->
+      <div class="mic-panel">
+        <div class="mic-ring" id="micRing">
+          <button class="mic-btn" id="micBtn" onclick="toggleRecording()">
+            <i class="fa-solid fa-microphone" id="micIcon"></i>
+          </button>
+        </div>
+        <p class="mic-status" id="micStatus">Click to speak</p>
+
+        <!-- Text fallback -->
+        <div class="text-input-wrap">
+          <input type="text" id="textInput" placeholder="Or type your query here…" />
+          <button class="send-btn" onclick="sendText()">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+
+        <!-- Sample queries -->
+        <div class="sample-wrap">
+          <p class="sample-label">Sample queries:</p>
+          <div class="sample-chips">
+            <span class="chip" onclick="setInput('I want to check my account balance')">Balance</span>
+            <span class="chip" onclick="setInput('My internet is not working')">Internet</span>
+            <span class="chip" onclick="setInput('Cancel my subscription')">Cancel</span>
+            <span class="chip" onclick="setInput('I have a billing complaint')">Billing</span>
+            <span class="chip" onclick="setInput('Transfer me to a human agent')">Human</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Response panel -->
+      <div class="response-panel">
+        <div class="result-box" id="resultBox">
+          <div class="result-placeholder">
+            <i class="fa-solid fa-waveform-lines fa-2x"></i>
+            <p>Assistant response will appear here</p>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="tags-row" id="tagsRow" style="display:none">
+          <span class="tag tag-lang" id="tagLang"><i class="fa-solid fa-globe"></i> —</span>
+          <span class="tag tag-intent" id="tagIntent"><i class="fa-solid fa-bullseye"></i> —</span>
+          <span class="tag tag-sentiment" id="tagSentiment"><i class="fa-solid fa-face-smile"></i> —</span>
+        </div>
+
+        <!-- Escalate button -->
+        <button class="escalate-btn" onclick="escalate()">
+          <i class="fa-solid fa-headset"></i> Transfer to Human Agent
+        </button>
+
+        <!-- Loading overlay -->
+        <div class="loading-overlay" id="loadingOverlay" style="display:none">
+          <div class="spinner"></div>
+          <p>Processing your request…</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HISTORY ────────────────────────────── -->
+  <section id="section-history" class="section">
+    <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Conversation History</h2>
+    <div class="table-wrapper">
+      <table class="history-table" id="historyTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Timestamp</th>
+            <th>User Query</th>
+            <th>Language</th>
+            <th>Intent</th>
+            <th>Sentiment</th>
+            <th>Response</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr><td colspan="8" class="empty-row">No history yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-actions">
+      <a href="/export" class="btn-primary"><i class="fa-solid fa-download"></i> Export CSV</a>
+      <button class="btn-secondary" onclick="refreshHistory()">
+        <i class="fa-solid fa-rotate"></i> Refresh
+      </button>
+    </div>
+  </section>
+
+  <!-- ── FAQ / KB ───────────────────────────── -->
+  <section id="section-faq" class="section">
+    <h2 class="section-title"><i class="fa-solid fa-circle-question"></i> FAQ Knowledge Base</h2>
+    <div class="faq-grid">
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-clock"></i> Working Hours?</div>
+        <div class="faq-a">Our customer support is available 24/7, 365 days a year.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-key"></i> How to Reset Password?</div>
+        <div class="faq-a">Visit the login page and click "Forgot Password". A reset link will be sent to your registered email.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-credit-card"></i> Payment Methods?</div>
+        <div class="faq-a">We accept credit/debit cards, bank transfer, JazzCash, EasyPaisa, and cash at service centers.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-arrow-trend-up"></i> How to Upgrade Plan?</div>
+        <div class="faq-a">Log into your account portal and go to "Manage Plan" to upgrade, or call our sales line.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-wifi"></i> Internet Troubleshooting?</div>
+        <div class="faq-a">Restart your router, check all cables, and ensure your plan is active. Contact support if the issue persists.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-receipt"></i> Bill Dispute?</div>
+        <div class="faq-a">Contact billing support or use the Voice Assistant to register a billing complaint. Resolution within 2 business days.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  NOTIFICATION TOAST                        -->
+<!-- ══════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/script.js"></script>
+</body>
+</html>
